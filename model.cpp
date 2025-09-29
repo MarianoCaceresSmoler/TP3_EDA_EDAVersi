@@ -11,6 +11,8 @@
 
 #include "model.h"
 
+static bool eatPieces(GameModel &model, Square source, Direction dir);
+
 void initModel(GameModel &model)
 {
     model.gameOver = true;
@@ -116,6 +118,14 @@ bool playMove(GameModel &model, Square move)
     setBoardPiece(model, move, piece);
 
     // To-do: your code goes here...
+    eatPieces(model, move, UP_RIGHT);
+    eatPieces(model, move, UP);
+    eatPieces(model, move, UP_LEFT);
+    eatPieces(model, move, LEFT);
+    eatPieces(model, move, LEFT_DOWN);
+    eatPieces(model, move, DOWN);
+    eatPieces(model, move, RIGHT_DOWN);
+    eatPieces(model, move, RIGTH);
 
     // Update timer
     double currentTime = GetTime();
@@ -148,4 +158,34 @@ bool playMove(GameModel &model, Square move)
     }
 
     return true;
+}
+
+static bool eatPieces(GameModel &model, Square source, Direction dir)
+{
+    if(!isSquareValid({source.y+2*dir.y, source.x+2*dir.x})) return false;
+    if(!isSquareValid({source.y+dir.y, source.x+dir.x})) return false;
+
+    Player currentPlayer = getCurrentPlayer(model);
+    Piece eatablePiece = currentPlayer==PLAYER_BLACK ? PIECE_WHITE : PIECE_BLACK;
+    Piece eatingPiece = eatablePiece==PIECE_BLACK ? PIECE_WHITE : PIECE_BLACK;
+
+    if(model.board[source.y+dir.y][source.x+dir.x] == eatablePiece)
+    {
+        if(model.board[source.y+2*dir.y][source.x+2*dir.x] == eatingPiece)
+        {
+            model.board[source.y+dir.y][source.x+dir.x] = eatingPiece;
+            return true;
+        }else
+        {
+            if(model.board[source.y+2*dir.y][source.x+2*dir.x] == PIECE_EMPTY) return false;
+            if(eatPieces(model, {source.y+dir.y, source.x+dir.x}, dir))
+            {
+                model.board[source.y+dir.y][source.x+dir.x] = eatingPiece;
+                return true;
+            }
+        }
+        
+    }
+    
+    return false;
 }
