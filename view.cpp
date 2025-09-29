@@ -5,6 +5,8 @@
  * @copyright Copyright (c) 2023-2024
  */
 
+ #include <cmath>
+
 #include <string>
 
 #include "raylib.h"
