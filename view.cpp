@@ -198,6 +198,17 @@ void drawView(GameModel &model)
                 0.2F,
                 6,
                 DARKGREEN);
+            for (const auto& move : model.validMoves)
+            {
+                Vector2 posiblePosition = {
+                BOARD_X + (float)move.x * SQUARE_SIZE,
+                BOARD_Y + (float)move.y * SQUARE_SIZE};
+                DrawCircle(
+                    posiblePosition.x + PIECE_CENTER,
+                    posiblePosition.y + PIECE_CENTER,
+                    SQUARE_CONTENT_SIZE/4,
+                    RED);
+            }
 
             Piece piece = getBoardPiece(model, square);
 

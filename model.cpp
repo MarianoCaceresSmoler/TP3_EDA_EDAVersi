@@ -17,14 +17,14 @@ struct Direction
     int y;
 };
 
-#define UP_RIGHT (Direction){1, 1}
-#define UP (Direction){0, 1}
-#define UP_LEFT (Direction){-1, 1}
-#define LEFT (Direction){-1, 0}
-#define LEFT_DOWN (Direction){-1, -1}
-#define DOWN (Direction){0, -1}
-#define RIGHT_DOWN (Direction){1, -1}
-#define RIGTH (Direction){1, 0}
+#define UP_RIGHT Direction{1, 1}
+#define UP Direction{0, 1}
+#define UP_LEFT Direction{-1, 1}
+#define LEFT Direction{-1, 0}
+#define LEFT_DOWN Direction{-1, -1}
+#define DOWN Direction{0, -1}
+#define RIGHT_DOWN Direction{1, -1}
+#define RIGTH Direction{1, 0}
 
 /**
  * @brief Recursive function to try eating pieces in a given direction
@@ -36,6 +36,7 @@ struct Direction
  * @return Wether any pieces were eaten (true) or not (false).
  */
 static bool eatPieces(GameModel &model, Square source, Direction dir);
+static bool checkCurrentSquare(GameModel& model, Square source, Direction dir);
 
 void initModel(GameModel &model)
 {
@@ -116,19 +117,45 @@ bool isSquareValid(Square square)
 
 void getValidMoves(GameModel &model, Moves &validMoves)
 {
-    // To-do: your code goes here...
-
+	model.validMoves.clear();
     for (int y = 0; y < BOARD_SIZE; y++)
         for (int x = 0; x < BOARD_SIZE; x++)
         {
             Square move = {x, y};
+			if (getBoardPiece(model, move) != PIECE_EMPTY) continue;
+            for (Direction dir : {UP_RIGHT, UP, UP_LEFT, LEFT, LEFT_DOWN, DOWN, RIGHT_DOWN, RIGTH})
+            {
+                if(checkCurrentSquare(model, move, dir))
+                {
+                    model.validMoves.push_back(move);
+                    validMoves.push_back(move);
+                    break;
+                }
+			}
 
-            // +++ TEST
-            // Lists all empty squares...
-            if (getBoardPiece(model, move) == PIECE_EMPTY)
-                validMoves.push_back(move);
-            // --- TEST
         }
+}
+static bool checkCurrentSquare(GameModel& model, Square source, Direction dir)
+{
+    if (!isSquareValid({ source.x + 2 * dir.x, source.y + 2 * dir.y })) return false;
+    if (!isSquareValid({ source.x + dir.x, source.y + dir.y })) return false;
+    Player currentPlayer = getCurrentPlayer(model);
+    Piece currentPiece = currentPlayer == PLAYER_BLACK ? PIECE_BLACK : PIECE_WHITE;
+    Piece oponentPiece = currentPiece == PIECE_BLACK ? PIECE_WHITE : PIECE_BLACK;
+
+    if (model.board[source.y + dir.y][source.x + dir.x] == oponentPiece)
+    {
+        if (model.board[source.y + 2 * dir.y][source.x + 2 * dir.x] == currentPiece) // Base case
+            return true;
+        else if (model.board[source.y + 2 * dir.y][source.x + 2 * dir.x] == oponentPiece) // Recursive case
+        {
+            if (checkCurrentSquare(model, { source.x + dir.x, source.y + dir.y }, dir))
+                return true;
+        }
+
+    }
+
+    return false;
 }
 
 bool playMove(GameModel &model, Square move)
@@ -141,7 +168,7 @@ bool playMove(GameModel &model, Square move)
 
     setBoardPiece(model, move, piece);
 
-    // To-do: your code goes here...
+
     eatPieces(model, move, UP_RIGHT);
     eatPieces(model, move, UP);
     eatPieces(model, move, UP_LEFT);
@@ -183,6 +210,7 @@ bool playMove(GameModel &model, Square move)
 
     return true;
 }
+
 
 static bool eatPieces(GameModel &model, Square source, Direction dir)
 {
