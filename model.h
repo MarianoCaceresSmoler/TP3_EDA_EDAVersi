@@ -13,15 +13,6 @@
 
 #define BOARD_SIZE 8
 
-#define UP_RIGHT (Direction){1, 1}
-#define UP (Direction){1, 0}
-#define UP_LEFT (Direction){1, -1}
-#define LEFT (Direction){0, -1}
-#define LEFT_DOWN (Direction){-1, -1}
-#define DOWN (Direction){-1, 0}
-#define RIGHT_DOWN (Direction){-1, 1}
-#define RIGTH (Direction){0, 1}
-
 enum Player
 {
     PLAYER_BLACK,
@@ -36,12 +27,6 @@ enum Piece
 };
 
 struct Square
-{
-    int x;
-    int y;
-};
-
-struct Direction
 {
     int x;
     int y;

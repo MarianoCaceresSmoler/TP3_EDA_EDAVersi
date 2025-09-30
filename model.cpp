@@ -11,6 +11,30 @@
 
 #include "model.h"
 
+struct Direction
+{
+    int x;
+    int y;
+};
+
+#define UP_RIGHT (Direction){1, 1}
+#define UP (Direction){0, 1}
+#define UP_LEFT (Direction){-1, 1}
+#define LEFT (Direction){-1, 0}
+#define LEFT_DOWN (Direction){-1, -1}
+#define DOWN (Direction){0, -1}
+#define RIGHT_DOWN (Direction){1, -1}
+#define RIGTH (Direction){1, 0}
+
+/**
+ * @brief Recursive function to try eating pieces in a given direction
+ *
+ * @param model The game model.
+ * @param source Where the new piece was just placed
+ * @param dir Direction to try eating
+ * 
+ * @return Wether any pieces were eaten (true) or not (false).
+ */
 static bool eatPieces(GameModel &model, Square source, Direction dir);
 
 void initModel(GameModel &model)
@@ -162,8 +186,8 @@ bool playMove(GameModel &model, Square move)
 
 static bool eatPieces(GameModel &model, Square source, Direction dir)
 {
-    if(!isSquareValid({source.y+2*dir.y, source.x+2*dir.x})) return false;
-    if(!isSquareValid({source.y+dir.y, source.x+dir.x})) return false;
+    if(!isSquareValid({source.x+2*dir.x, source.y+2*dir.y})) return false;
+    if(!isSquareValid({source.x+dir.x, source.y+dir.y})) return false;
 
     Player currentPlayer = getCurrentPlayer(model);
     Piece eatablePiece = currentPlayer==PLAYER_BLACK ? PIECE_WHITE : PIECE_BLACK;
@@ -171,14 +195,13 @@ static bool eatPieces(GameModel &model, Square source, Direction dir)
 
     if(model.board[source.y+dir.y][source.x+dir.x] == eatablePiece)
     {
-        if(model.board[source.y+2*dir.y][source.x+2*dir.x] == eatingPiece)
+        if(model.board[source.y+2*dir.y][source.x+2*dir.x] == eatingPiece) // Base case
         {
             model.board[source.y+dir.y][source.x+dir.x] = eatingPiece;
             return true;
-        }else
+        }else if(model.board[source.y+2*dir.y][source.x+2*dir.x] == eatablePiece) // Recursive case
         {
-            if(model.board[source.y+2*dir.y][source.x+2*dir.x] == PIECE_EMPTY) return false;
-            if(eatPieces(model, {source.y+dir.y, source.x+dir.x}, dir))
+            if(eatPieces(model, {source.x+dir.x, source.y+dir.y}, dir))
             {
                 model.board[source.y+dir.y][source.x+dir.x] = eatingPiece;
                 return true;
@@ -187,5 +210,5 @@ static bool eatPieces(GameModel &model, Square source, Direction dir)
         
     }
     
-    return false;
+    return false; // Reached when model.board[source.y+dir.y][source.x+dir.x] != eatablePiece || model.board[source.y+2*dir.y][source.x+2*dir.x] == PIECE_EMPTY
 }
