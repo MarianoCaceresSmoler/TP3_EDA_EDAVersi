@@ -37,6 +37,10 @@ struct Square
         -1, -1              \
     }
 
+typedef Piece Board[BOARD_SIZE][BOARD_SIZE];
+
+typedef std::vector<Square> Moves;
+
 struct GameModel
 {
     bool gameOver;
@@ -46,13 +50,11 @@ struct GameModel
     double playerTime[2];
     double turnTimer;
 
-    Piece board[BOARD_SIZE][BOARD_SIZE];
+    Board board;
 
     Player humanPlayer;
-    std::vector<Square> validMoves;
+    Moves validMoves;
 };
-
-typedef std::vector<Square> Moves;
 
 /**
  * @brief Initializes a game model.
@@ -127,6 +129,14 @@ bool isSquareValid(Square square);
  * @param validMoves A list that receives the valid moves.
  */
 void getValidMoves(GameModel &model, Moves &validMoves);
+
+/**
+ * @brief Returns the number of moves a player can make
+ *
+ * @param board The game board.
+ * @param player The player whose moves we want to check.
+ */
+int getValidMovesNumber(Board board, Player player);
 
 /**
  * @brief Plays a move.

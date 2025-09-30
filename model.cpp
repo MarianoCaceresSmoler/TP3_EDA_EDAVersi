@@ -40,13 +40,14 @@ static bool eatPieces(GameModel &model, Square source, Direction dir);
 /**
  * @brief Recursive function to check if a square is a valid playing position. Similar implementation to eatPieces().
  *
- * @param model The game model.
- * @param source Where the new piece would be placed
- * @param dir Direction to test for opponent pieces
+ * @param board The game board.
+ * @param getCurrentPlayer The current player.
+ * @param source Where the new piece would be placed.
+ * @param dir Direction to test for opponent pieces.
  * 
  * @return Wether the square is playable (true) or not (false).
  */
-static bool checkCurrentSquare(GameModel& model, Square source, Direction dir);
+static bool checkCurrentSquare(Board board, Player currentPlayer, Square source, Direction dir);
 
 void initModel(GameModel &model)
 {
@@ -135,7 +136,7 @@ void getValidMoves(GameModel &model, Moves &validMoves)
 			if (getBoardPiece(model, move) != PIECE_EMPTY) continue;
             for (Direction dir : {UP_RIGHT, UP, UP_LEFT, LEFT, LEFT_DOWN, DOWN, RIGHT_DOWN, RIGTH})
             {
-                if(checkCurrentSquare(model, move, dir))
+                if(checkCurrentSquare(model.board, getCurrentPlayer(model), move, dir))
                 {
                     model.validMoves.push_back(move);
                     validMoves.push_back(move);
@@ -144,6 +145,29 @@ void getValidMoves(GameModel &model, Moves &validMoves)
 			}
 
         }
+}
+
+int getValidMovesNumber(Board board, Player currentPlayer)
+{
+    int totalMoves = 0;
+
+    for (int y = 0; y < BOARD_SIZE; y++)
+        for (int x = 0; x < BOARD_SIZE; x++)
+        {
+            Square move = {x, y};
+			if (board[y][x] != PIECE_EMPTY) continue;
+            for (Direction dir : {UP_RIGHT, UP, UP_LEFT, LEFT, LEFT_DOWN, DOWN, RIGHT_DOWN, RIGTH})
+            {
+                if(checkCurrentSquare(board, currentPlayer, move, dir))
+                {
+                    totalMoves++;
+                    break;
+                }
+			}
+
+        }
+
+    return totalMoves;
 }
 
 bool playMove(GameModel &model, Square move)
@@ -156,15 +180,8 @@ bool playMove(GameModel &model, Square move)
 
     setBoardPiece(model, move, piece);
 
-
-    eatPieces(model, move, UP_RIGHT);
-    eatPieces(model, move, UP);
-    eatPieces(model, move, UP_LEFT);
-    eatPieces(model, move, LEFT);
-    eatPieces(model, move, LEFT_DOWN);
-    eatPieces(model, move, DOWN);
-    eatPieces(model, move, RIGHT_DOWN);
-    eatPieces(model, move, RIGTH);
+    for (Direction dir : {UP_RIGHT, UP, UP_LEFT, LEFT, LEFT_DOWN, DOWN, RIGHT_DOWN, RIGTH})
+        eatPieces(model, move, dir);
 
     // Update timer
     double currentTime = GetTime();
@@ -229,21 +246,20 @@ static bool eatPieces(GameModel &model, Square source, Direction dir)
     return false; // Reached when model.board[source.y+dir.y][source.x+dir.x] != eatablePiece || model.board[source.y+2*dir.y][source.x+2*dir.x] == PIECE_EMPTY
 }
 
-static bool checkCurrentSquare(GameModel& model, Square source, Direction dir)
+static bool checkCurrentSquare(Board board, Player currentPlayer, Square source, Direction dir)
 {
     if (!isSquareValid({ source.x + 2 * dir.x, source.y + 2 * dir.y })) return false;
     if (!isSquareValid({ source.x + dir.x, source.y + dir.y })) return false;
-    Player currentPlayer = getCurrentPlayer(model);
     Piece currentPiece = currentPlayer == PLAYER_BLACK ? PIECE_BLACK : PIECE_WHITE;
     Piece oponentPiece = currentPiece == PIECE_BLACK ? PIECE_WHITE : PIECE_BLACK;
 
-    if (model.board[source.y + dir.y][source.x + dir.x] == oponentPiece)
+    if (board[source.y + dir.y][source.x + dir.x] == oponentPiece)
     {
-        if (model.board[source.y + 2 * dir.y][source.x + 2 * dir.x] == currentPiece) // Base case
+        if (board[source.y + 2 * dir.y][source.x + 2 * dir.x] == currentPiece) // Base case
             return true;
-        else if (model.board[source.y + 2 * dir.y][source.x + 2 * dir.x] == oponentPiece) // Recursive case
+        else if (board[source.y + 2 * dir.y][source.x + 2 * dir.x] == oponentPiece) // Recursive case
         {
-            if (checkCurrentSquare(model, { source.x + dir.x, source.y + dir.y }, dir))
+            if (checkCurrentSquare(board, currentPlayer, { source.x + dir.x, source.y + dir.y }, dir))
                 return true;
         }
 
