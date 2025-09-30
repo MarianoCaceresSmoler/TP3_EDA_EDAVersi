@@ -73,7 +73,7 @@ int evaluateBoard(const GameModel* game, Player maxPlayer)
     // Recorro todo el tablero
     for (int x = 0; x < BOARD_SIZE; x++) {
         for (int y = 0; y < BOARD_SIZE; y++) {
-            Piece piece = game->board[x][y];
+            Piece piece = game->board[y][x];
 
             // Cuento solo si la casilla esta vacia
             if (piece == PIECE_EMPTY) {
@@ -90,7 +90,7 @@ int evaluateBoard(const GameModel* game, Player maxPlayer)
                 for (int k = 0; k < 8; k++) {
                     int nx = x + dx[k], ny = y + dy[k];
                     if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE &&
-                        game->board[nx][ny] == PIECE_EMPTY) {
+                        game->board[ny][nx] == PIECE_EMPTY) {
                         myFrontier++;
                         break; // Si encuentro un vacio salgo
                     }
@@ -105,7 +105,7 @@ int evaluateBoard(const GameModel* game, Player maxPlayer)
                 for (int k = 0; k < 8; k++) {
                     int nx = x + dx[k], ny = y + dy[k];
                     if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE &&
-                        game->board[nx][ny] == PIECE_EMPTY) {
+                        game->board[ny][nx] == PIECE_EMPTY) {
                         oppFrontier++;
                         break;
                     }
