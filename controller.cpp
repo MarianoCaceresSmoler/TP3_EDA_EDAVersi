@@ -6,6 +6,7 @@
  */
 
 #include <algorithm>
+#include <iostream>
 
 #include "raylib.h"
 
@@ -71,7 +72,8 @@ bool updateView(GameModel &model)
         IsKeyPressed(KEY_ENTER))
         ToggleFullscreen();
 
-    printf("%d \n", evaluateBoard(&model, PLAYER_WHITE));
+    std:: cout << evaluateBoard(&model, PLAYER_WHITE) << std::endl;
+
     drawView(model);
 
     return true;
