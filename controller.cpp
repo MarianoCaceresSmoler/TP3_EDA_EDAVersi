@@ -71,6 +71,7 @@ bool updateView(GameModel &model)
         IsKeyPressed(KEY_ENTER))
         ToggleFullscreen();
 
+    printf("%d \n", evaluateBoard(&model, PLAYER_WHITE));
     drawView(model);
 
     return true;
