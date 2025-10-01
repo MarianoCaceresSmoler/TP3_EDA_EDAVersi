@@ -13,8 +13,8 @@
 Square getBestMove(GameModel &model)
 {
     // To-do: your code goes here...
-
-
+    
+    return findBestMove(model, 4);
 
     // +++ TEST
     // Returns a random valid move...
@@ -25,6 +25,72 @@ Square getBestMove(GameModel &model)
     return validMoves[index];
     // --- TEST
 }
+
+
+
+Square findBestMove(GameModel model, int depth) {
+    int bestValue = -10000;
+    Square bestMove = { -1, -1 };
+
+    Moves validMoves;
+    getValidMoves(model, validMoves);
+
+    for (const auto& move : validMoves) {
+        GameModel nextModel = model;
+        playMove(nextModel, move);
+
+        int moveValue = minimax(nextModel, depth - 1, false, model.currentPlayer);
+
+        if (moveValue > bestValue) {
+            bestValue = moveValue;
+            bestMove = move;
+        }
+    }
+
+    return bestMove;
+}
+
+
+int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer) {
+    // Caso base
+    if (depth == 0 || model.gameOver) {
+        return evaluateBoard(model.board, maxPlayer);
+    }
+
+    Moves validMoves;
+    getValidMoves(model, validMoves);
+
+    if (validMoves.empty()) {
+        // Si no hay jugadas válidas, el jugador pasa turno automáticamente
+        GameModel nextModel = model;
+        nextModel.currentPlayer = (model.currentPlayer == PLAYER_BLACK ? PLAYER_WHITE : PLAYER_BLACK);
+        return minimax(nextModel, depth - 1, !maximizingPlayer, maxPlayer);
+    }
+
+    if (maximizingPlayer) {
+        int maxEval = -10000;
+        for (const auto& move : validMoves) {
+            GameModel nextModel = model;       // copia del estado
+            playMove(nextModel, move);         // aplica la jugada
+            int eval = minimax(nextModel, depth - 1, false, maxPlayer);
+            maxEval = std::max(maxEval, eval);
+        }
+        return maxEval;
+    }
+    else {
+        int minEval = 10000;
+        for (const auto& move : validMoves) {
+            GameModel nextModel = model;
+            playMove(nextModel, move);
+            int eval = minimax(nextModel, depth - 1, true, maxPlayer);
+            minEval = std::min(minEval, eval);
+        }
+        return minEval;
+    }
+}
+
+
+
 
 
 // Tabla de pesos estáticos para Reversi
