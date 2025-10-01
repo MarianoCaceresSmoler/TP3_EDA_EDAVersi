@@ -17,7 +17,7 @@
  */
 Square getBestMove(GameModel &model);
 
-int evaluateBoard(const GameModel* game, Player maxPlayer);
+int evaluateBoard(Board board, Player maxPlayer);
 
 
 #endif

@@ -6,7 +6,7 @@
  */
 
 #include <cstdlib>
-
+#include <iostream>
 #include "ai.h"
 #include "controller.h"
 
@@ -48,14 +48,7 @@ inline Piece opponentPiece(Player p) {
     return (p == PLAYER_BLACK) ? PIECE_WHITE : PIECE_BLACK;
 }
 
-int countLegalMoves(const GameModel* game, Player player)
-{
-    return 5; //OJO ESTO ESTA HARCODEADO, ACA VA LA FUNCION DE LUCCA Y NANO
-}
-
-
-
-int evaluateBoard(const GameModel* game, Player maxPlayer)
+int evaluateBoard(Board board, Player maxPlayer)
 {
     // Convierto el jugador en pieza (esto es re criminal)
     Piece myPiece = playerToPiece(maxPlayer);
@@ -73,7 +66,7 @@ int evaluateBoard(const GameModel* game, Player maxPlayer)
     // Recorro todo el tablero
     for (int x = 0; x < BOARD_SIZE; x++) {
         for (int y = 0; y < BOARD_SIZE; y++) {
-            Piece piece = game->board[y][x];
+            Piece piece = board[y][x];
 
             // Cuento solo si la casilla esta vacia
             if (piece == PIECE_EMPTY) {
@@ -90,7 +83,7 @@ int evaluateBoard(const GameModel* game, Player maxPlayer)
                 for (int k = 0; k < 8; k++) {
                     int nx = x + dx[k], ny = y + dy[k];
                     if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE &&
-                        game->board[ny][nx] == PIECE_EMPTY) {
+                        board[ny][nx] == PIECE_EMPTY) {
                         myFrontier++;
                         break; // Si encuentro un vacio salgo
                     }
@@ -105,7 +98,7 @@ int evaluateBoard(const GameModel* game, Player maxPlayer)
                 for (int k = 0; k < 8; k++) {
                     int nx = x + dx[k], ny = y + dy[k];
                     if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE &&
-                        game->board[ny][nx] == PIECE_EMPTY) {
+                        board[ny][nx] == PIECE_EMPTY) {
                         oppFrontier++;
                         break;
                     }
@@ -115,15 +108,14 @@ int evaluateBoard(const GameModel* game, Player maxPlayer)
     }
 
     // Estas son las metricas que estoy tomando para evaluar una posicion
-
     // Paridad de fichas (diferencia porcentual entre mis fichas y las del rival)
     int parity = (myDiscs + oppDiscs > 0)
         ? 100 * (myDiscs - oppDiscs) / (myDiscs + oppDiscs)
         : 0;
 
     // Movilidad (quién tiene más movimientos legales disponibles)
-    int myMoves = countLegalMoves(game, maxPlayer);
-    int oppMoves = countLegalMoves(game, (maxPlayer == PLAYER_BLACK) ? PLAYER_WHITE : PLAYER_BLACK);
+    int myMoves = getValidMovesNumber(board, maxPlayer);
+    int oppMoves = getValidMovesNumber(board, (maxPlayer == PLAYER_BLACK) ? PLAYER_WHITE : PLAYER_BLACK);
     int mobility = (myMoves + oppMoves > 0)
         ? 100 * (myMoves - oppMoves) / (myMoves + oppMoves)
         : 0;
