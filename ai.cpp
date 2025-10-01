@@ -9,7 +9,7 @@
 #include <iostream>
 #include "ai.h"
 #include "controller.h"
-
+#define INF 10000
 Square getBestMove(GameModel &model)
 {
     // To-do: your code goes here...
@@ -29,7 +29,7 @@ Square getBestMove(GameModel &model)
 
 
 Square findBestMove(GameModel model, int depth) {
-    int bestValue = -10000;
+    int bestValue = -INF;
     Square bestMove = { -1, -1 };
 
     Moves validMoves;
@@ -68,7 +68,7 @@ int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer)
     }
 
     if (maximizingPlayer) {
-        int maxEval = -10000;
+        int maxEval = -INF;
         for (const auto& move : validMoves) {
             GameModel nextModel = model;       // copia del estado
             playMove(nextModel, move);         // aplica la jugada
@@ -78,7 +78,7 @@ int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer)
         return maxEval;
     }
     else {
-        int minEval = 10000;
+        int minEval = INF;
         for (const auto& move : validMoves) {
             GameModel nextModel = model;
             playMove(nextModel, move);
