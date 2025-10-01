@@ -72,7 +72,7 @@ bool updateView(GameModel &model)
         IsKeyPressed(KEY_ENTER))
         ToggleFullscreen();
 
-    std:: cout << evaluateBoard(model.board, PLAYER_WHITE) << std::endl;
+    std:: cout << evaluateBoard(model.board, PLAYER_BLACK) << std::endl;
 
     drawView(model);
 

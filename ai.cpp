@@ -1,4 +1,4 @@
-/**
+ï»¿/**
  * @brief Implements the Reversi game AI
  * @author Marc S. Ressl
  *
@@ -27,7 +27,7 @@ Square getBestMove(GameModel &model)
 }
 
 
-// Tabla de pesos estáticos para Reversi
+// Tabla de pesos estÃ¡ticos para Reversi
 static const int POSITIONAL_WEIGHTS[BOARD_SIZE][BOARD_SIZE] = {
     {120, -20, 20,  5,  5, 20, -20, 120},
     {-20, -40, -5, -5, -5, -5, -40, -20},
@@ -50,16 +50,17 @@ inline Piece opponentPiece(Player p) {
 
 int evaluateBoard(Board board, Player maxPlayer)
 {
-    // Convierto el jugador en pieza (esto es re criminal)
+    // Convierto el jugador en pieza
     Piece myPiece = playerToPiece(maxPlayer);
     Piece oppPiece = opponentPiece(maxPlayer);
 
-    int myDiscs = 0, oppDiscs = 0;         // Cantidad de fichas propias y del otro
+    // Matricas basicas
+    int myDiscs = 0, oppDiscs = 0;         // Cantidad de fichas propias y del rival
     int myScorePos = 0, oppScorePos = 0;   // Suma de los valores de la tabla de posiciones
-    int myFrontier = 0, oppFrontier = 0;   // Fichas que están en adyacentes a casillas vacías
-    int emptyCount = 0;                    // Cuantos espacios vacíos quedan
+    int myFrontier = 0, oppFrontier = 0;   // Cantidad de fichas adyacentes a casillas vacÃ­as
+    int emptyCount = 0;                    // CuÃ¡ntos espacios vacÃ­os quedan en el tablero
 
-    // Aca guardo las direcciones a chequear
+    // Direcciones posibles (8 alrededor de una casilla)
     const int dx[8] = { -1, -1, -1, 0, 0, 1, 1, 1 };
     const int dy[8] = { -1,  0,  1,-1, 1,-1, 0, 1 };
 
@@ -68,7 +69,7 @@ int evaluateBoard(Board board, Player maxPlayer)
         for (int y = 0; y < BOARD_SIZE; y++) {
             Piece piece = board[y][x];
 
-            // Cuento solo si la casilla esta vacia
+            // Si la casilla estÃ¡ vacia
             if (piece == PIECE_EMPTY) {
                 emptyCount++;
                 continue;
@@ -77,24 +78,25 @@ int evaluateBoard(Board board, Player maxPlayer)
             // Si es mi ficha
             if (piece == myPiece) {
                 myDiscs++;                            // Sumo a mis fichas
-                myScorePos += POSITIONAL_WEIGHTS[x][y]; // Aca mi score depende de donde este ubicada la ficha
+                myScorePos += POSITIONAL_WEIGHTS[x][y]; // Sumo el valor posicional
 
-                // Verifico si está en la frontera (pegada a un casillero vacio)
+                // Verifico si estÃ¡ en la frontera (adyacente a un casillero vacio)
                 for (int k = 0; k < 8; k++) {
                     int nx = x + dx[k], ny = y + dy[k];
                     if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE &&
                         board[ny][nx] == PIECE_EMPTY) {
                         myFrontier++;
-                        break; // Si encuentro un vacio salgo
+                        break; // Si encuentro un vacÃ­o salgo
                     }
                 }
             }
 
-            // Si es la ficha del otro
+            // Si es ficha del rival
             else if (piece == oppPiece) {
-                oppDiscs++;
-                oppScorePos += POSITIONAL_WEIGHTS[x][y];
+                oppDiscs++;                             // Sumo a las fichas del rival
+                oppScorePos += POSITIONAL_WEIGHTS[x][y]; // Sumo el valor posicional
 
+                // Verifico si esta en la frontera
                 for (int k = 0; k < 8; k++) {
                     int nx = x + dx[k], ny = y + dy[k];
                     if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE &&
@@ -107,53 +109,57 @@ int evaluateBoard(Board board, Player maxPlayer)
         }
     }
 
-    // Estas son las metricas que estoy tomando para evaluar una posicion
-    // Paridad de fichas (diferencia porcentual entre mis fichas y las del rival)
-    int parity = (myDiscs + oppDiscs > 0)
-        ? 100 * (myDiscs - oppDiscs) / (myDiscs + oppDiscs)
-        : 0;
 
-    // Movilidad (quién tiene más movimientos legales disponibles)
+    // NormalizaciÃ³n de mÃ©tricas
+
+    // Paridad de fichas (diferencia relativa de cantidad de fichas)
+    double parity = (myDiscs + oppDiscs > 0)
+        ? (double)(myDiscs - oppDiscs) / (myDiscs + oppDiscs)
+        : 0.0;
+
+    // Movilidad (quiÃ©n tiene mÃ¡s movimientos legales disponibles)
     int myMoves = getValidMovesNumber(board, maxPlayer);
     int oppMoves = getValidMovesNumber(board, (maxPlayer == PLAYER_BLACK) ? PLAYER_WHITE : PLAYER_BLACK);
-    int mobility = (myMoves + oppMoves > 0)
-        ? 100 * (myMoves - oppMoves) / (myMoves + oppMoves)
-        : 0;
+    double mobility = (myMoves + oppMoves > 0)
+        ? (double)(myMoves - oppMoves) / (myMoves + oppMoves)
+        : 0.0;
 
-    // Frontera (tener muchas piezas en frontera es malo -> por eso se resta)
-    int frontier = (myFrontier + oppFrontier > 0)
-        ? -100 * (myFrontier - oppFrontier) / (myFrontier + oppFrontier)
-        : 0;
+    // Frontier (tener mÃ¡s fichas en frontera es malo â†’ se resta)
+    double frontier = (myFrontier + oppFrontier > 0)
+        ? -(double)(myFrontier - oppFrontier) / (myFrontier + oppFrontier)
+        : 0.0;
 
-    // Puntaje posicional (sumo los valores de la tabla de pesos de mis fichas vs las del rival)
-    int positional = myScorePos - oppScorePos;
+    // Puntaje posicional (normalizado por el mÃ¡ximo absoluto posible 7680 = 64 * 120)
+    double positional = (double)(myScorePos - oppScorePos) / 7680.0;
 
-    // Veo en que etapa del juego estoy
-    int score = 0;
-    if (emptyCount > 44) { // early game (muchos huecos todavía)
-        score = 10 * parity + 80 * mobility + 30 * frontier + 100 * positional;
+    // EvaluaciÃ³n segÃºn etapa del juego
+    double score = 0.0;
+    if (emptyCount > 44) { // early game (muchos espacios vacÃ­os todavÃ­a)
+        score = 0.1 * parity + 0.8 * mobility + 0.3 * frontier + 1.0 * positional;
     }
     else if (emptyCount > 20) { // mid game
-        score = 10 * parity + 70 * mobility + 50 * frontier + 50 * positional;
+        score = 0.1 * parity + 0.7 * mobility + 0.5 * frontier + 0.5 * positional;
     }
     else { // late game (quedan pocas casillas)
-        score = 100 * parity + 10 * mobility + 20 * frontier + 10 * positional;
+        score = 1.0 * parity + 0.1 * mobility + 0.2 * frontier + 0.1 * positional;
     }
 
-    return score; // devuelvo la evaluación final de la posición
+    // Escalo el score a un rango legible [-100, 100]
+    return (int)(score * 100);
 }
 
 
-/*
-Principios de una buena función de evaluación en Reversi
---------------------------------------------------------
-- No alcanza con contar fichas: en las etapas tempranas/medias del juego el conteo bruto engaña.
-- Lo importante es controlar la movilidad y la estabilidad.
-- Conviene ponderar distinto según la etapa del juego (early, mid, late).
 
-Heurísticas clásicas
+/*
+Principios de una buena funciÃ³n de evaluaciÃ³n en Reversi
+--------------------------------------------------------
+- No alcanza con contar fichas: en las etapas tempranas/medias del juego el conteo bruto engaÃ±a.
+- Lo importante es controlar la movilidad y la estabilidad.
+- Conviene ponderar distinto segÃºn la etapa del juego (early, mid, late).
+
+HeurÃ­sticas clÃ¡sicas
 --------------------
-La función de evaluación puede ser una combinación ponderada:
+La funciÃ³n de evaluaciÃ³n puede ser una combinaciÃ³n ponderada:
 
    Eval(s) = w1*C(s) + w2*M(s) + w3*S(s) + w4*P(s) + w5*F(s)
 
@@ -164,15 +170,15 @@ Donde:
    ? Importante casi exclusivamente al final del juego.
 
 2) M(s) - Mobility (movilidad)
-   Diferencia en número de movimientos legales posibles.
+   Diferencia en nÃºmero de movimientos legales posibles.
    M(s) = 100 * (myMoves - oppMoves) / (myMoves + oppMoves + 1)
 
 3) S(s) - Stability (estabilidad)
-   Cuántas fichas no se pueden voltear jamás (esquinas, bordes y protegidas).
+   CuÃ¡ntas fichas no se pueden voltear jamÃ¡s (esquinas, bordes y protegidas).
    Una ficha estable es una ventaja permanente.
 
-4) P(s) - Positional Weights (tabla de pesos estática)
-   Usar una tabla de evaluación típica 8x8:
+4) P(s) - Positional Weights (tabla de pesos estÃ¡tica)
+   Usar una tabla de evaluaciÃ³n tÃ­pica 8x8:
 
       120 -20  20   5   5  20 -20 120
       -20 -40  -5  -5  -5  -5 -40 -20
@@ -189,16 +195,16 @@ Donde:
    - Centro = neutral/ligeramente positivo.
 
 5) F(s) - Frontier Discs (discos frontera)
-   Discos adyacentes a un espacio vacío.
-   Cuantos menos discos frontera, mejor (más solidez).
+   Discos adyacentes a un espacio vacÃ­o.
+   Cuantos menos discos frontera, mejor (mÃ¡s solidez).
    F(s) = -100 * (myFrontier - oppFrontier) / (myFrontier + oppFrontier + 1)
 
 Etapas del juego
 ----------------
-Conviene ajustar los pesos según la cantidad de casillas vacías:
+Conviene ajustar los pesos segÃºn la cantidad de casillas vacÃ­as:
 
-- Early game (0–20 movs): enfatizar movilidad, evitar esquinas malas, tabla posicional.
-- Mid game (20–40 movs): movilidad + estabilidad + frontera.
+- Early game (0â€“20 movs): enfatizar movilidad, evitar esquinas malas, tabla posicional.
+- Mid game (20â€“40 movs): movilidad + estabilidad + frontera.
 - Late game (40+ movs): el conteo de fichas (coin parity) domina.
 
 Ejemplo de pesos efectivos:
