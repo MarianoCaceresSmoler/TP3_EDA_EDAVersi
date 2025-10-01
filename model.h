@@ -53,7 +53,6 @@ struct GameModel
     Board board;
 
     Player humanPlayer;
-    Moves validMoves;
 };
 
 /**

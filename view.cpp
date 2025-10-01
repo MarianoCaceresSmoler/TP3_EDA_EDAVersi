@@ -198,7 +198,10 @@ void drawView(GameModel &model)
                 0.2F,
                 6,
                 DARKGREEN);
-            for (const auto& move : model.validMoves)
+            
+            Moves validMoves;
+            getValidMoves(model, validMoves);
+            for (const auto& move : validMoves)
             {
                 Vector2 posiblePosition = {
                 BOARD_X + (float)move.x * SQUARE_SIZE,

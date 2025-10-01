@@ -128,7 +128,6 @@ bool isSquareValid(Square square)
 
 void getValidMoves(GameModel &model, Moves &validMoves)
 {
-	model.validMoves.clear();
     for (int y = 0; y < BOARD_SIZE; y++)
         for (int x = 0; x < BOARD_SIZE; x++)
         {
@@ -138,7 +137,6 @@ void getValidMoves(GameModel &model, Moves &validMoves)
             {
                 if(checkCurrentSquare(model.board, getCurrentPlayer(model), move, dir))
                 {
-                    model.validMoves.push_back(move);
                     validMoves.push_back(move);
                     break;
                 }
