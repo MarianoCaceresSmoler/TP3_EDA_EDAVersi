@@ -124,7 +124,7 @@ int evaluateBoard(Board board, Player maxPlayer)
         ? (double)(myMoves - oppMoves) / (myMoves + oppMoves)
         : 0.0;
 
-    // Frontier (tener más fichas en frontera es malo → se resta)
+    // Frontier (tener más fichas en frontera es malo entonces se resta)
     double frontier = (myFrontier + oppFrontier > 0)
         ? -(double)(myFrontier - oppFrontier) / (myFrontier + oppFrontier)
         : 0.0;
