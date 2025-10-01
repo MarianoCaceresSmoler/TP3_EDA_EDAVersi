@@ -14,7 +14,7 @@ Square getBestMove(GameModel &model)
 {
     // To-do: your code goes here...
     
-    return findBestMove(model, 4);
+    return findBestMove(model, 5);
 
     // +++ TEST
     // Returns a random valid move...
@@ -39,7 +39,7 @@ Square findBestMove(GameModel model, int depth) {
         GameModel nextModel = model;
         playMove(nextModel, move);
 
-        int moveValue = minimax(nextModel, depth - 1, false, model.currentPlayer);
+        int moveValue = minimax(nextModel, depth - 1,-INF,INF, false, model.currentPlayer);
 
         if (moveValue > bestValue) {
             bestValue = moveValue;
@@ -50,8 +50,8 @@ Square findBestMove(GameModel model, int depth) {
     return bestMove;
 }
 
-
-int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer) {
+//alpha-beta pruning minimax, alpha setea el mejor valor que el maximizador puede asegurar en ese nivel o niveles superiores y beta el mejor valor que el minimizador puede asegurar en ese nivel o niveles superiores
+int minimax(GameModel model, int depth, int alpha, int beta, bool maximizingPlayer, Player maxPlayer) {
     // Caso base
     if (depth == 0 || model.gameOver) {
         return evaluateBoard(model.board, maxPlayer);
@@ -64,7 +64,7 @@ int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer)
         // Si no hay jugadas válidas, el jugador pasa turno automáticamente
         GameModel nextModel = model;
         nextModel.currentPlayer = (model.currentPlayer == PLAYER_BLACK ? PLAYER_WHITE : PLAYER_BLACK);
-        return minimax(nextModel, depth - 1, !maximizingPlayer, maxPlayer);
+        return minimax(nextModel, depth - 1,alpha,beta, !maximizingPlayer, maxPlayer);
     }
 
     if (maximizingPlayer) {
@@ -72,8 +72,10 @@ int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer)
         for (const auto& move : validMoves) {
             GameModel nextModel = model;       // copia del estado
             playMove(nextModel, move);         // aplica la jugada
-            int eval = minimax(nextModel, depth - 1, false, maxPlayer);
-            maxEval = std::max(maxEval, eval);
+            int eval = minimax(nextModel, depth - 1,alpha,beta, false, maxPlayer);
+			if (eval > maxEval) maxEval = eval;
+			if (eval > alpha) alpha = eval; // actualiza alpha
+			if (beta <= alpha) break; // poda beta
         }
         return maxEval;
     }
@@ -82,8 +84,10 @@ int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer)
         for (const auto& move : validMoves) {
             GameModel nextModel = model;
             playMove(nextModel, move);
-            int eval = minimax(nextModel, depth - 1, true, maxPlayer);
-            minEval = std::min(minEval, eval);
+            int eval = minimax(nextModel, depth - 1,alpha,beta, true, maxPlayer);
+			if (eval < minEval) minEval = eval;
+			if (eval < beta) beta = eval; // actualiza beta
+			if (beta <= alpha) break; // poda alpha
         }
         return minEval;
     }

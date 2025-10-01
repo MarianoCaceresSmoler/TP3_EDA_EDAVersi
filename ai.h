@@ -20,6 +20,6 @@ Square getBestMove(GameModel &model);
 int evaluateBoard(Board board, Player maxPlayer);
 
 Square findBestMove(GameModel model, int depth);
-int minimax(GameModel model, int depth, bool maximizingPlayer, Player maxPlayer);
+int minimax(GameModel model, int depth, int alpha, int beta, bool maximizingPlayer, Player maxPlayer);
 
 #endif
