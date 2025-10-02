@@ -10,11 +10,14 @@
 #include "ai.h"
 #include "controller.h"
 #define INF 10000
+
+unsigned int exploratedNodes = 0;
+
 Square getBestMove(GameModel &model)
 {
     // To-do: your code goes here...
     
-    return findBestMove(model, 5);
+    return findBestMove(model, 7);
 
     // +++ TEST
     // Returns a random valid move...
@@ -120,6 +123,9 @@ inline Piece opponentPiece(Player p) {
 
 int evaluateBoard(Board board, Player maxPlayer)
 {
+    //Cuento la cantidad de nodos explorados
+    exploratedNodes++;
+
     // Convierto el jugador en pieza
     Piece myPiece = playerToPiece(maxPlayer);
     Piece oppPiece = opponentPiece(maxPlayer);

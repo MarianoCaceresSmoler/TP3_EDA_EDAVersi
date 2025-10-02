@@ -14,6 +14,8 @@
 #include "view.h"
 #include "controller.h"
 
+extern unsigned int exploratedNodes;
+
 bool updateView(GameModel &model)
 {
     if (WindowShouldClose())
@@ -62,8 +64,10 @@ bool updateView(GameModel &model)
     else
     {
         // AI player
+        exploratedNodes = 0;
         Square square = getBestMove(model);
-
+        std::cout << "Evaluacion del tablero (Jugador Humano): " << evaluateBoard(model.board, model.humanPlayer) << std::endl;
+        std::cout << "Cantidad de nodos explorados: " << exploratedNodes << std::endl << std::endl;
         playMove(model, square);
     }
 
@@ -72,7 +76,7 @@ bool updateView(GameModel &model)
         IsKeyPressed(KEY_ENTER))
         ToggleFullscreen();
 
-    std:: cout << evaluateBoard(model.board, PLAYER_BLACK) << std::endl;
+    
 
     drawView(model);
 
