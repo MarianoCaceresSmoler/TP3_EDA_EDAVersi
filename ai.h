@@ -9,6 +9,23 @@
 #define AI_H
 
 #include "model.h"
+#include <unordered_map>
+
+enum Bound
+{
+	EXACT,
+	LOWER_BOUND,
+	UPPER_BOUND
+};
+
+struct NodePunctuation
+{
+	int eval;
+	Bound bound;
+	int depth;
+};
+
+typedef std::unordered_map<uint64_t, NodePunctuation> NodesTable; // Keys are Zobrist hash
 
 /**
  * @brief Returns the best move for a certain position.
@@ -17,9 +34,9 @@
  */
 Square getBestMove(GameModel &model);
 
-int evaluateBoard(Board board, Player maxPlayer);
+int evaluateBoard(const Board board, Player maxPlayer);
 
-Square findBestMove(GameModel model, int depth);
-int minimax(GameModel model, int depth, int alpha, int beta, bool maximizingPlayer, Player maxPlayer);
+Square findBestMove(const GameModel& model, int depth);
+int minimax(const GameModel& model, NodesTable& table, int depth, int alpha, int beta, bool maximizingPlayer, Player maxPlayer);
 
 #endif

@@ -75,7 +75,7 @@ void startModel(GameModel &model);
  * @param model The game model.
  * @return PLAYER_WHITE or PLAYER_BLACK.
  */
-Player getCurrentPlayer(GameModel &model);
+Player getCurrentPlayer(const GameModel &model);
 
 /**
  * @brief Returns the model's current score.
@@ -84,7 +84,7 @@ Player getCurrentPlayer(GameModel &model);
  * @param player The player (PLAYER_WHITE or PLAYER_BLACK).
  * @return The score.
  */
-int getScore(GameModel &model, Player player);
+int getScore(const GameModel &model, Player player);
 
 /**
  * @brief Returns the game timer for a player.
@@ -93,7 +93,7 @@ int getScore(GameModel &model, Player player);
  * @param player The player (PLAYER_WHITE or PLAYER_BLACK).
  * @return The time in seconds.
  */
-double getTimer(GameModel &model, Player player);
+double getTimer(const GameModel &model, Player player);
 
 /**
  * @brief Return a model's piece.
@@ -102,7 +102,7 @@ double getTimer(GameModel &model, Player player);
  * @param square The square.
  * @return The piece at the square.
  */
-Piece getBoardPiece(GameModel &model, Square square);
+Piece getBoardPiece(const GameModel &model, Square square);
 
 /**
  * @brief Sets a model's piece.
@@ -127,7 +127,7 @@ bool isSquareValid(Square square);
  * @param model The game model.
  * @param validMoves A list that receives the valid moves.
  */
-void getValidMoves(GameModel &model, Moves &validMoves);
+void getValidMoves(const GameModel &model, Moves &validMoves);
 
 /**
  * @brief Returns the number of moves a player can make
@@ -135,7 +135,7 @@ void getValidMoves(GameModel &model, Moves &validMoves);
  * @param board The game board.
  * @param player The player whose moves we want to check.
  */
-int getValidMovesNumber(Board board, Player player);
+int getValidMovesNumber(const Board board, Player player);
 
 /**
  * @brief Plays a move.

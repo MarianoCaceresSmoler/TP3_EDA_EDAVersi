@@ -47,7 +47,7 @@ static bool eatPieces(GameModel &model, Square source, Direction dir);
  * 
  * @return Wether the square is playable (true) or not (false).
  */
-static bool checkCurrentSquare(Board board, Player currentPlayer, Square source, Direction dir);
+static bool checkCurrentSquare(const Board board, Player currentPlayer, Square source, Direction dir);
 
 void initModel(GameModel &model)
 {
@@ -76,12 +76,12 @@ void startModel(GameModel &model)
     model.board[BOARD_SIZE / 2][BOARD_SIZE / 2 - 1] = PIECE_BLACK;
 }
 
-Player getCurrentPlayer(GameModel &model)
+Player getCurrentPlayer(const GameModel &model)
 {
     return model.currentPlayer;
 }
 
-int getScore(GameModel &model, Player player)
+int getScore(const GameModel &model, Player player)
 {
     int score = 0;
 
@@ -98,7 +98,7 @@ int getScore(GameModel &model, Player player)
     return score;
 }
 
-double getTimer(GameModel &model, Player player)
+double getTimer(const GameModel &model, Player player)
 {
     double turnTime = 0;
 
@@ -108,7 +108,7 @@ double getTimer(GameModel &model, Player player)
     return model.playerTime[player] + turnTime;
 }
 
-Piece getBoardPiece(GameModel &model, Square square)
+Piece getBoardPiece(const GameModel &model, Square square)
 {
     return model.board[square.y][square.x];
 }
@@ -126,7 +126,7 @@ bool isSquareValid(Square square)
            (square.y < BOARD_SIZE);
 }
 
-void getValidMoves(GameModel &model, Moves &validMoves)
+void getValidMoves(const GameModel &model, Moves &validMoves)
 {
     for (int y = 0; y < BOARD_SIZE; y++)
         for (int x = 0; x < BOARD_SIZE; x++)
@@ -145,7 +145,7 @@ void getValidMoves(GameModel &model, Moves &validMoves)
         }
 }
 
-int getValidMovesNumber(Board board, Player currentPlayer)
+int getValidMovesNumber(const Board board, Player currentPlayer)
 {
     int totalMoves = 0;
 
@@ -244,7 +244,7 @@ static bool eatPieces(GameModel &model, Square source, Direction dir)
     return false; // Reached when model.board[source.y+dir.y][source.x+dir.x] != eatablePiece || model.board[source.y+2*dir.y][source.x+2*dir.x] == PIECE_EMPTY
 }
 
-static bool checkCurrentSquare(Board board, Player currentPlayer, Square source, Direction dir)
+static bool checkCurrentSquare(const Board board, Player currentPlayer, Square source, Direction dir)
 {
     if (!isSquareValid({ source.x + 2 * dir.x, source.y + 2 * dir.y })) return false;
     if (!isSquareValid({ source.x + dir.x, source.y + dir.y })) return false;

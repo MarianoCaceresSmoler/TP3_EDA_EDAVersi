@@ -7,24 +7,15 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <unordered_map>
 #include "ai.h"
 #include "controller.h"
 #define INF 10000
 
-enum Bound
+uint64_t calcZobristHash(Board board)
 {
-	EXACT,
-	LOWER_BOUND,
-	UPPER_BOUND
-};
-
-struct NodePunctuation
-{
-	int eval;
-	Bound bound;
-	int depth;
-};
+    // TODO: completar
+    return 1234;
+}
 
 unsigned int exploratedNodes = 0;
 
@@ -46,7 +37,7 @@ Square getBestMove(GameModel &model)
 
 
 
-Square findBestMove(GameModel model, int depth) 
+Square findBestMove(const GameModel& model, int depth) 
 {
     int bestValue = -INF;
     Square bestMove = { -1, -1 };
@@ -59,7 +50,8 @@ Square findBestMove(GameModel model, int depth)
         GameModel nextModel = model;
         playMove(nextModel, move);
 
-        int moveValue = minimax(nextModel, depth - 1,-INF,INF, false, model.currentPlayer);
+        NodesTable table;
+        int moveValue = minimax(nextModel, table, depth - 1,-INF,INF, false, model.currentPlayer);
 
         if (moveValue > bestValue) 
 		{
@@ -72,40 +64,47 @@ Square findBestMove(GameModel model, int depth)
 }
 
 //alpha-beta pruning minimax, alpha setea el mejor valor que el maximizador puede asegurar en ese nivel o niveles superiores y beta el mejor valor que el minimizador puede asegurar en ese nivel o niveles superiores
-int minimax(GameModel model, int depth, int alpha, int beta, bool maximizingPlayer, Player maxPlayer) {
+int minimax(const GameModel& model, NodesTable& table, int depth, int alpha, int beta, bool maximizingPlayer, Player maxPlayer)
+{
     // Caso base
-    if (depth == 0 || model.gameOver) {
+    if (depth == 0 || model.gameOver) 
+    {
         return evaluateBoard(model.board, maxPlayer);
     }
 
     Moves validMoves;
     getValidMoves(model, validMoves);
 
-    if (validMoves.empty()) {
+    if (validMoves.empty()) 
+    {
         // Si no hay jugadas válidas, el jugador pasa turno automáticamente
         GameModel nextModel = model;
         nextModel.currentPlayer = (model.currentPlayer == PLAYER_BLACK ? PLAYER_WHITE : PLAYER_BLACK);
-        return minimax(nextModel, depth - 1,alpha,beta, !maximizingPlayer, maxPlayer);
+        return minimax(nextModel, table, depth - 1,alpha,beta, !maximizingPlayer, maxPlayer);
     }
 
-    if (maximizingPlayer) {
+    if (maximizingPlayer) 
+    {
         int maxEval = -INF;
-        for (const auto& move : validMoves) {
+        for (const auto& move : validMoves) 
+        {
             GameModel nextModel = model;       // copia del estado
             playMove(nextModel, move);         // aplica la jugada
-            int eval = minimax(nextModel, depth - 1,alpha,beta, false, maxPlayer);
+            int eval = minimax(nextModel, table, depth - 1,alpha,beta, false, maxPlayer);
 			if (eval > maxEval) maxEval = eval;
 			if (eval > alpha) alpha = eval; // actualiza alpha
 			if (beta <= alpha) break; // poda beta
         }
         return maxEval;
     }
-    else {
+    else 
+    {
         int minEval = INF;
-        for (const auto& move : validMoves) {
+        for (const auto& move : validMoves) 
+        {
             GameModel nextModel = model;
             playMove(nextModel, move);
-            int eval = minimax(nextModel, depth - 1,alpha,beta, true, maxPlayer);
+            int eval = minimax(nextModel, table, depth - 1,alpha,beta, true, maxPlayer);
 			if (eval < minEval) minEval = eval;
 			if (eval < beta) beta = eval; // actualiza beta
 			if (beta <= alpha) break; // poda alpha
@@ -139,7 +138,7 @@ inline Piece opponentPiece(Player p) {
     return (p == PLAYER_BLACK) ? PIECE_WHITE : PIECE_BLACK;
 }
 
-int evaluateBoard(Board board, Player maxPlayer)
+int evaluateBoard(const Board board, Player maxPlayer)
 {
     //Cuento la cantidad de nodos explorados
     exploratedNodes++;
