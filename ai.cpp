@@ -7,9 +7,24 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <unordered_map>
 #include "ai.h"
 #include "controller.h"
 #define INF 10000
+
+enum Bound
+{
+	EXACT,
+	LOWER_BOUND,
+	UPPER_BOUND
+};
+
+struct NodePunctuation
+{
+	int eval;
+	Bound bound;
+	int depth;
+};
 
 unsigned int exploratedNodes = 0;
 
@@ -31,20 +46,23 @@ Square getBestMove(GameModel &model)
 
 
 
-Square findBestMove(GameModel model, int depth) {
+Square findBestMove(GameModel model, int depth) 
+{
     int bestValue = -INF;
     Square bestMove = { -1, -1 };
 
     Moves validMoves;
     getValidMoves(model, validMoves);
 
-    for (const auto& move : validMoves) {
+    for (const auto& move : validMoves) 
+	{
         GameModel nextModel = model;
         playMove(nextModel, move);
 
         int moveValue = minimax(nextModel, depth - 1,-INF,INF, false, model.currentPlayer);
 
-        if (moveValue > bestValue) {
+        if (moveValue > bestValue) 
+		{
             bestValue = moveValue;
             bestMove = move;
         }
@@ -293,3 +311,4 @@ Stability       50    100    200
 Positional     100     50     10
 Frontier        30     50     20
 */
+
